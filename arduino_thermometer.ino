@@ -8,7 +8,7 @@ float i = 0;
 float fixtemp = 20.;
 int fixInput = 560;
 float fixedDegreeValue = 5.5;
-const int  countInicator = 3;
+const int  countIndicator = 3;
 byte arrayNumber[] = {0b11000000, 0b11111001, 0b10100100,
                       0b10110000, 0b10011001, 0b10010010,
                       0b10000010, 0b11111000, 0b10000000,
@@ -39,18 +39,8 @@ int countRank(float number) {
 }
 
 void echoNumber(float number, int indicatorCount = 1) {
-  digitalWrite(latchPin, LOW);
-  int point = countRank(number);
-  int intNumber = (float)pow(10, point - 1) * number;
-  for (int i = indicatorCount; i > 0; i--) {
-    byte pointByte = 0b0;
-    if (point > 0 && (point - 1) == (indicatorCount - i)) {
-      pointByte = 0b10000000;
-    }
-    shiftOut(dataPin, clockPin, MSBFIRST, arrayNumber[intNumber % 10] - pointByte);
-    intNumber /= 10;
-  }
-  digitalWrite(latchPin, HIGH);
+  int point = indicatorCount - countRank(number);
+  echoNumber((int)((float)pow(10, point) * number), indicatorCount, point);
 }
 
 void setup() {
@@ -61,21 +51,8 @@ void setup() {
 
 void loop() {
   sensorValue = analogRead(sensorPin);
-  if (sensorValue > fixInput ) { // ice cube
-    i = sensorValue - fixInput;
-    i = i / fixedDegreeValue;
-    fixtemp = fixtemp - i;
-    echoNumber(fixtemp, countInicator);
-  }
-  else if (sensorValue < fixInput) {
-    i =  fixInput - sensorValue;
-    i = i / fixedDegreeValue;
-    fixtemp = fixtemp + i;
-    echoNumber(fixtemp, countInicator);
-  }
-  else if (sensorValue == fixInput ) {
-    echoNumber(20, countInicator);
-  }
-  fixtemp = 20;
+  i =  fixInput - sensorValue;
+  i = i / fixedDegreeValue;
+  echoNumber(fixtemp + i, countIndicator);
   delay(500);
 }
